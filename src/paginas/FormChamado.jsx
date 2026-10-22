@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function FormChamado() {
 
   const navigate = useNavigate();
+  const { id } = useParams(); // Resgata o ID da URL se estiver na rota /editar/:id
+
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [tipo, setTipo] = useState("");
@@ -27,6 +29,18 @@ export default function FormChamado() {
         setLocais(resgatarLocais.data);
         const resgatarPrioridades = await api.get("/prioridades")
         setPrioridades(resgatarPrioridades.data);
+
+        // Se houver um ID na URL, busca os dados do chamado para preencher o formulário na edição
+        if (id) {
+          const resgatarChamado = await api.get(`/chamados/${id}`);
+          const dados = resgatarChamado.data;
+          setTitulo(dados.titulo || "");
+          setDescricao(dados.descricao || "");
+          setTipo(dados.tipo || "");
+          setLocal(dados.local || "");
+          setPrioridade(dados.prioridade || "");
+          setData_abertura(dados.data_abertura || "");
+        }
       } catch (error) {
         console.error("Erro ao carregar as opções:", error);
       } finally {
@@ -35,24 +49,32 @@ export default function FormChamado() {
     } 
 
     carregarOpcoes();
-  }, [])
+  }, [id])
 
     async function handleSubmit(e) {
       e.preventDefault();
 
       try {
-        await api.post("/chamados", {
+        const payload = {
           titulo,
           descricao,
           tipo,
           local,
           prioridade,
           data_abertura
-        });
+        };
+
+        if (id) {
+          // Se existir ID, atualiza o chamado existente (PUT /chamados/:id)
+          await api.put(`/chamados/${id}`, payload);
+        } else {
+          // Se não existir ID, cria um novo chamado (POST /chamados)
+          await api.post("/chamados", payload);
+        }
 
         navigate("/") // Redireciona para Home
       } catch (error) {
-        console.error("Erro ao criar chamado:", error); // mensagem ao desenvolvedor 
+        console.error("Erro ao salvar chamado:", error); // mensagem ao desenvolvedor 
         alert("Erro ao cadastrar o chamado. Verifique os campos."); // mensagem ao usuário
       }
   }
@@ -71,7 +93,7 @@ export default function FormChamado() {
     return (
       <div className="container-form">
         <div className="card-form">
-          <h1>Formulário de Chamado</h1>
+          <h1>{id ? "Editar Chamado" : "Formulário de Chamado"}</h1>
           <form onSubmit={handleSubmit} className="form-chamado">
             <div className="form-group">
               <label>Título do chamado:</label>
@@ -141,7 +163,9 @@ export default function FormChamado() {
             </div>
             
             <div className="form-acoes">
-              <button type="submit" className="btn btn-submeter">Submeter</button>
+              <button type="submit" className="btn btn-submeter">
+                {id ? "Salvar Alterações" : "Submeter"}
+              </button>
               <button type="button" className="btn btn-voltar" onClick={() => navigate("/")}>Voltar</button>
             </div>
           </form>

@@ -90,8 +90,8 @@ export default function Home() {
               <select className="select-filtro" value={tipo} onChange={(e) => setTipo(e.target.value)}>
                 <option value="">Todos os tipos</option>
                 {tipos.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.nome}
+                  <option value={item} key={item}>
+                    {item}
                   </option>
                 ))}
               </select>
@@ -99,8 +99,8 @@ export default function Home() {
               <select className="select-filtro" value={local} onChange={(e) => setLocal(e.target.value)}>
                 <option value="">Todos os locais</option>
                 {locais.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.nome}
+                  <option value={item} key={item}>
+                    {item}
                   </option>
                 ))}
               </select>
@@ -108,8 +108,8 @@ export default function Home() {
               <select className="select-filtro" value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
                 <option value="">Todas as prioridades</option>
                 {prioridades.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.nome}
+                  <option value={item} key={item}>
+                    {item}
                   </option>
                 ))}
               </select>
